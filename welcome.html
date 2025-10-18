@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Magang PayFlow - Sederhana</title>
+    <style>
+        /* CSS Jadul - No Flexbox/Grid, Simple Table Layout */
+        body {
+            font-family: Arial, serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border: 2px solid #999;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            background-color: #003366;
+            color: white;
+            padding: 15px;
+            margin: -20px -20px 20px -20px;
+            font-size: 24px;
+        }
+        
+        h2 {
+            color: #003366;
+            border-bottom: 2px solid #003366;
+            padding-bottom: 5px;
+        }
+        
+        /* Tab sederhana pakai table */
+        .tabs {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .tabs td {
+            background-color: #e0e0e0;
+            border: 1px solid #999;
+            padding: 10px 20px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .tabs td.active {
+            background-color: #003366;
+            color: white;
+        }
+        
+        .tabs td:hover {
+            background-color: #ccc;
+        }
+        
+        .tabs td.active:hover {
+            background-color: #003366;
+        }
+        
+        /* Content sections */
+        .section {
+            display: none;
+            border: 1px solid #999;
+            padding: 20px;
+            background-color: #fafafa;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        /* Form sederhana */
+        table.form-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table.form-table td {
+            padding: 8px;
+            vertical-align: top;
+        }
+        
+        table.form-table td:first-child {
+            width: 150px;
+            font-weight: bold;
+            text-align: right;
+            padding-right: 15px;
+        }
+        
+        input[type="text"], input[type="tel"], input[type="password"], input[type="file"] {
+            width: 300px;
+            padding: 5px;
+            border: 1px solid #999;
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: #003366;
+            color: white;
+            padding: 8px 20px;
+            border: 1px solid #003366;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background-color: #004080;
+        }
+        
+        .btn-red {
+            background-color: #cc0000;
+            border-color: #cc0000;
+        }
+        
+        .btn-red:hover {
+            background-color: #ff0000;
+        }
+        
+        /* Table untuk data */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid #999;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: #003366;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        /* Status badges */
+        .status-pending {
+            background-color: yellow;
+            padding: 2px 8px;
+            color: black;
+            font-weight: bold;
+        }
+        
+        .status-approved {
+            background-color: green;
+            padding: 2px 8px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        /* QR area sederhana */
+        .qr-area {
+            border: 2px dashed #999;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            background-color: white;
+        }
+        
+        .qr-code {
+            margin: 10px 0;
+        }
+        
+        /* Simple message */
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #999;
+        }
+        
+        .message.success {
+            background-color: #ccffcc;
+            border-color: green;
+        }
+        
+        .message.error {
+            background-color: #ffcccc;
+            border-color: red;
+        }
+        
+        /* Old school spacing */
+        .spacer {
+            height: 20px;
+        }
+        
+        .center {
+            text-align: center;
+        }
+        
+        /* Simple user dashboard */
+        .user-info {
+            background-color: #e0f0ff;
+            border: 1px solid #003366;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .token-box {
+            background-color: #ffffcc;
+            border: 2px solid #ffcc00;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 SISTEM MAGANG PAYFLOW</h1>
+        
+        <!-- Simple Tab Navigation -->
+        <table class="tabs">
+            <tr>
+                <td id="tab-payment" class="active" onclick="showSection('payment')">💰 PEMBAYARAN</td>
+                <td id="tab-admin" onclick="showSection('admin')">👤 ADMIN</td>
+                <td id="tab-user" onclick="showSection('user')">🔑 USER LOGIN</td>
+                <td id="tab-gate" onclick="showSection('gate')">🚪 GATE SCAN</td>
+            </tr>
+        </table>
+
+        <!-- SECTION: PEMBAYARAN -->
+        <div id="section-payment" class="section active">
+            <h2>💰 Form Pembayaran Tiket</h2>
+            <form id="paymentForm" onsubmit="submitPayment(); return false;">
+                <table class="form-table">
+                    <tr>
+                        <td>Nama Lengkap:</td>
+                        <td><input type="text" id="fullname" required></td>
+                    </tr>
+                    <tr>
+                        <td>No HP:</td>
+                        <td><input type="tel" id="phone" placeholder="628xxxxxxxxx" required></td>
+                    </tr>
+                    <tr>
+                        <td>Jumlah Bayar:</td>
+                        <td><input type="text" id="amount" placeholder="contoh: 50000" required></td>
+                    </tr>
+                    <tr>
+                        <td>Bukti Transfer:</td>
+                        <td><input type="file" id="proof" accept="image/*" required></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <button type="button" onclick="generatePaymentQR()">Generate QR</button>
+                            <button type="submit">KIRIM PEMBAYARAN</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+            
+            <div id="paymentMessage"></div>
+            
+            <div id="paymentQR" class="qr-area" style="display: none;">
+                <h3>📱 QR Code Pembayaran</h3>
+                <div id="qrContainer"></div>
+                <p><b>Bank:</b> BCA - 1234567890<br>
+                <b>Atas Nama:</b> PT PAYFLOW INDONESIA</p>
+            </div>
+        </div>
+
+        <!-- SECTION: ADMIN -->
+        <div id="section-admin" class="section">
+            <div id="adminLogin">
+                <h2>👤 Login Admin</h2>
+                <table class="form-table">
+                    <tr>
+                        <td>Username:</td>
+                        <td><input type="text" id="adminUser" value="admin"></td>
+                    </tr>
+                    <tr>
+                        <td>Password:</td>
+                        <td><input type="password" id="adminPass" value="admin123"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><button onclick="adminLogin()">LOGIN</button></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div id="adminPanel" style="display: none;">
+                <h2>👤 Panel Admin</h2>
+                <p>
+                    <button onclick="adminLogout()">LOGOUT</button>
+                    <button onclick="clearAllData()" class="btn-red">HAPUS SEMUA DATA</button>
+                </p>
+                
+                <h3>📋 Daftar Pembayaran:</h3>
+                <div id="paymentsList"></div>
+            </div>
+        </div>
+
+        <!-- SECTION: USER LOGIN -->
+        <div id="section-user" class="section">
+            <div id="userLogin">
+                <h2>🔑 Login User</h2>
+                <table class="form-table">
+                    <tr>
+                        <td>No HP:</td>
+                        <td><input type="tel" id="userPhone" placeholder="628xxxxxxxxx"></td>
+                    </tr>
+                    <tr>
+                        <td>Password:</td>
+                        <td><input type="password" id="userPassword" value="123"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><button onclick="userLogin()">LOGIN</button></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div id="userDashboard" style="display: none;">
+                <h2>🏠 Dashboard User</h2>
+                <p><button onclick="userLogout()">LOGOUT</button></p>
+                
+                <div class="user-info">
+                    <h3>ℹ️ Info User</h3>
+                    <p id="userInfo"></p>
+                </div>
+                
+                <div class="token-box">
+                    <h3>🎫 TOKEN AKSES ANDA:</h3>
+                    <input type="text" id="userToken" readonly style="width: 200px; font-family: monospace;">
+                    <button onclick="copyToken()">COPY</button>
+                </div>
+                
+                <div class="qr-area">
+                    <h3>📱 QR Code Gate Access</h3>
+                    <div id="userQR"></div>
+                    <p>Tunjukkan QR ini ke petugas gate</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: GATE SCAN -->
+        <div id="section-gate" class="section">
+            <h2>🚪 Gate Scanner</h2>
+            <table class="form-table">
+                <tr>
+                    <td>Token/QR:</td>
+                    <td><input type="text" id="gateToken" placeholder="Masukkan token"></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><button onclick="scanGate()">SCAN/VALIDASI</button></td>
+                </tr>
+            </table>
+            
+            <div id="gateResult"></div>
+        </div>
+    </div>
+
+    <script>
+        // Simple JavaScript - No Classes, Basic Functions Only
+        
+        // Global variables
+        var currentUser = null;
+        var isAdminLoggedIn = false;
+        
+        // Initialize
+        function init() {
+            // Check if already logged in
+            var savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showUserDashboard();
+            }
+            
+            var adminState = localStorage.getItem('adminLoggedIn');
+            if (adminState === 'true') {
+                isAdminLoggedIn = true;
+                showAdminPanel();
+            }
+        }
+        
+        // Tab navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            var sections = document.getElementsByClassName('section');
+            for (var i = 0; i < sections.length; i++) {
+                sections[i].classList.remove('active');
+            }
+            
+            // Remove active from all tabs
+            var tabs = document.getElementsByTagName('td');
+            for (var i = 0; i < tabs.length; i++) {
+                if (tabs[i].onclick) {
+                    tabs[i].classList.remove('active');
+                }
+            }
+            
+            // Show selected section
+            document.getElementById('section-' + sectionName).classList.add('active');
+            document.getElementById('tab-' + sectionName).classList.add('active');
+        }
+        
+        // Payment functions
+        function submitPayment() {
+            var fullname = document.getElementById('fullname').value;
+            var phone = document.getElementById('phone').value;
+            var amount = document.getElementById('amount').value;
+            var proof = document.getElementById('proof').files[0];
+            
+            // Simple validation
+            if (!fullname || !phone || !amount || !proof) {
+                showMessage('paymentMessage', 'Semua field harus diisi!', 'error');
+                return;
+            }
+            
+            // Validate phone
+            var cleanPhone = phone.replace(/\D/g, '');
+            if (!cleanPhone.startsWith('628') || cleanPhone.length < 11) {
+                showMessage('paymentMessage', 'No HP harus format 628xxxxxxxxx', 'error');
+                return;
+            }
+            
+            // Simple file to base64
+            var reader = new FileReader();
+            reader.onload = function() {
+                var payment = {
+                    id: generateId(),
+                    fullname: fullname,
+                    phone: cleanPhone,
+                    amount: parseInt(amount),
+                    proofImage: reader.result,
+                    status: 'PENDING',
+                    date: new Date().toLocaleDateString('id-ID')
+                };
+                
+                // Save to localStorage
+                var payments = getPayments();
+                payments.push(payment);
+                localStorage.setItem('payments', JSON.stringify(payments));
+                
+                showMessage('paymentMessage', 'Pembayaran berhasil dikirim! ID: ' + payment.id.substring(0, 8), 'success');
+                document.getElementById('paymentForm').reset();
+                document.getElementById('paymentQR').style.display = 'none';
+            };
+            reader.readAsDataURL(proof);
+        }
+        
+        function generatePaymentQR() {
+            var fullname = document.getElementById('fullname').value;
+            var phone = document.getElementById('phone').value;
+            var amount = document.getElementById('amount').value;
+            
+            if (!fullname || !phone || !amount) {
+                alert('Isi semua field dulu!');
+                return;
+            }
+            
+            var qrData = 'PAYMENT:' + fullname + ':' + phone + ':' + amount;
+            generateSimpleQR('qrContainer', qrData);
+            document.getElementById('paymentQR').style.display = 'block';
+        }
+        
+        // Admin functions
+        function adminLogin() {
+            var username = document.getElementById('adminUser').value;
+            var password = document.getElementById('adminPass').value;
+            
+            if (username === 'admin' && password === 'admin123') {
+                isAdminLoggedIn = true;
+                localStorage.setItem('adminLoggedIn', 'true');
+                showAdminPanel();
+            } else {
+                alert('Username atau password salah!');
+            }
+        }
+        
+        function showAdminPanel() {
+            document.getElementById('adminLogin').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            loadPaymentsList();
+        }
+        
+        function adminLogout() {
+            isAdminLoggedIn = false;
+            localStorage.removeItem('adminLoggedIn');
+            document.getElementById('adminLogin').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+        
+        function loadPaymentsList() {
+            var payments = getPayments();
+            var html = '';
+            
+            if (payments.length === 0) {
+                html = '<p>Belum ada pembayaran</p>';
+            } else {
+                html = '<table class="data-table">';
+                html += '<tr><th>Nama</th><th>HP</th><th>Jumlah</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr>';
+                
+                for (var i = 0; i < payments.length; i++) {
+                    var p = payments[i];
+                    html += '<tr>';
+                    html += '<td>' + p.fullname + '</td>';
+                    html += '<td>' + p.phone + '</td>';
+                    html += '<td>Rp ' + p.amount.toLocaleString('id-ID') + '</td>';
+                    html += '<td><span class="status-' + p.status.toLowerCase() + '">' + p.status + '</span></td>';
+                    html += '<td>' + p.date + '</td>';
+                    html += '<td>';
+                    if (p.status === 'PENDING') {
+                        html += '<button onclick="approvePayment(\'' + p.id + '\')">APPROVE</button> ';
+                    }
+                    html += '<button onclick="deletePayment(\'' + p.id + '\')" class="btn-red">HAPUS</button>';
+                    html += '</td>';
+                    html += '</tr>';
+                }
+                html += '</table>';
+            }
+            
+            document.getElementById('paymentsList').innerHTML = html;
+        }
+        
+        function approvePayment(paymentId) {
+            var payments = getPayments();
+            var payment = null;
+            
+            for (var i = 0; i < payments.length; i++) {
+                if (payments[i].id === paymentId) {
+                    payments[i].status = 'APPROVED';
+                    payment = payments[i];
+                    break;
+                }
+            }
+            
+            localStorage.setItem('payments', JSON.stringify(payments));
+            
+            // Create user account
+            var users = getUsers();
+            users.push({
+                id: generateId(),
+                phone: payment.phone,
+                password: '123',
+                fullname: payment.fullname,
+                date: new Date().toLocaleDateString('id-ID')
+            });
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // Create token
+            var tokens = getTokens();
+            var token = generateToken();
+            tokens.push({
+                id: generateId(),
+                token: token,
+                phone: payment.phone,
+                used: false,
+                date: new Date().toLocaleDateString('id-ID')
+            });
+            localStorage.setItem('tokens', JSON.stringify(tokens));
+            
+            loadPaymentsList();
+            
+            var message = 'Pembayaran tiket disetujui!\\n\\nLogin Info:\\nHP: ' + payment.phone + '\\nPassword: 123\\n\\nToken: ' + token;
+            var waLink = 'https://wa.me/' + payment.phone + '?text=' + encodeURIComponent(message);
+            
+            if (confirm('Pembayaran disetujui! Kirim info ke WhatsApp?')) {
+                window.open(waLink, '_blank');
+            }
+        }
+        
+        function deletePayment(paymentId) {
+            if (confirm('Hapus pembayaran ini?')) {
+                var payments = getPayments().filter(function(p) { return p.id !== paymentId; });
+                localStorage.setItem('payments', JSON.stringify(payments));
+                loadPaymentsList();
+            }
+        }
+        
+        function clearAllData() {
+            if (confirm('HAPUS SEMUA DATA? Tindakan ini tidak bisa dibatalkan!')) {
+                localStorage.clear();
+                alert('Semua data telah dihapus!');
+                location.reload();
+            }
+        }
+        
+        // User functions
+        function userLogin() {
+            var phone = document.getElementById('userPhone').value;
+            var password = document.getElementById('userPassword').value;
+            
+            var user = validateUser(phone, password);
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showUserDashboard();
+            } else {
+                alert('No HP atau password salah!');
+            }
+        }
+        
+        function showUserDashboard() {
+            document.getElementById('userLogin').style.display = 'none';
+            document.getElementById('userDashboard').style.display = 'block';
+            
+            document.getElementById('userInfo').innerHTML = 
+                '<b>Nama:</b> ' + currentUser.fullname + '<br>' +
+                '<b>HP:</b> ' + currentUser.phone;
+            
+            generateUserToken();
+        }
+        
+        function userLogout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            document.getElementById('userLogin').style.display = 'block';
+            document.getElementById('userDashboard').style.display = 'none';
+        }
+        
+        function generateUserToken() {
+            var tokens = getTokens();
+            var userToken = null;
+            
+            for (var i = 0; i < tokens.length; i++) {
+                if (tokens[i].phone === currentUser.phone && !tokens[i].used) {
+                    userToken = tokens[i];
+                    break;
+                }
+            }
+            
+            if (userToken) {
+                document.getElementById('userToken').value = userToken.token;
+                generateSimpleQR('userQR', 'GATE:' + userToken.token);
+            }
+        }
+        
+        function copyToken() {
+            var tokenInput = document.getElementById('userToken');
+            tokenInput.select();
+            document.execCommand('copy');
+            alert('Token berhasil di-copy!');
+        }
+        
+        // Gate functions
+        function scanGate() {
+            var tokenValue = document.getElementById('gateToken').value.trim();
+            
+            if (!tokenValue) {
+                showMessage('gateResult', 'Masukkan token!', 'error');
+                return;
+            }
+            
+            // Handle QR format
+            var actualToken = tokenValue;
+            if (tokenValue.startsWith('GATE:')) {
+                actualToken = tokenValue.replace('GATE:', '');
+            }
+            
+            var token = getTokenByValue(actualToken);
+            if (!token) {
+                showMessage('gateResult', 'Token tidak valid!', 'error');
+                return;
+            }
+            
+            if (token.used) {
+                showMessage('gateResult', 'Token sudah digunakan!', 'error');
+                return;
+            }
+            
+            // Use token
+            var tokens = getTokens();
+            for (var i = 0; i < tokens.length; i++) {
+                if (tokens[i].token === actualToken) {
+                    tokens[i].used = true;
+                    tokens[i].usedDate = new Date().toLocaleDateString('id-ID');
+                    break;
+                }
+            }
+            localStorage.setItem('tokens', JSON.stringify(tokens));
+            
+            showMessage('gateResult', 'Akses berhasil untuk ' + token.phone + '!', 'success');
+            document.getElementById('gateToken').value = '';
+        }
+        
+        // Utility functions
+        function getPayments() {
+            return JSON.parse(localStorage.getItem('payments') || '[]');
+        }
+        
+        function getUsers() {
+            return JSON.parse(localStorage.getItem('users') || '[]');
+        }
+        
+        function getTokens() {
+            return JSON.parse(localStorage.getItem('tokens') || '[]');
+        }
+        
+        function getTokenByValue(tokenValue) {
+            var tokens = getTokens();
+            for (var i = 0; i < tokens.length; i++) {
+                if (tokens[i].token === tokenValue) {
+                    return tokens[i];
+                }
+            }
+            return null;
+        }
+        
+        function validateUser(phone, password) {
+            var users = getUsers();
+            var cleanPhone = phone.replace(/\D/g, '');
+            
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].phone === cleanPhone && users[i].password === password) {
+                    return users[i];
+                }
+            }
+            return null;
+        }
+        
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+        
+        function generateToken() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 8).toUpperCase();
+        }
+        
+        function showMessage(elementId, message, type) {
+            var element = document.getElementById(elementId);
+            element.innerHTML = '<div class="message ' + type + '">' + message + '</div>';
+            
+            setTimeout(function() {
+                element.innerHTML = '';
+            }, 5000);
+        }
+        
+        // Simple QR Generator (very basic pattern)
+        function generateSimpleQR(containerId, data) {
+            var container = document.getElementById(containerId);
+            var canvas = document.createElement('canvas');
+            canvas.width = 150;
+            canvas.height = 150;
+            var ctx = canvas.getContext('2d');
+            
+            // White background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 150, 150);
+            
+            // Simple hash-based pattern
+            var hash = simpleHash(data);
+            ctx.fillStyle = '#000000';
+            
+            // Create simple pattern based on hash
+            var cellSize = 5;
+            for (var x = 10; x < 140; x += cellSize) {
+                for (var y = 10; y < 140; y += cellSize) {
+                    var index = Math.floor(x/cellSize) + Math.floor(y/cellSize) * 26;
+                    if ((hash >> (index % 32)) & 1) {
+                        ctx.fillRect(x, y, cellSize-1, cellSize-1);
+                    }
+                }
+            }
+            
+            // Corner markers
+            ctx.fillRect(10, 10, 20, 20);
+            ctx.fillRect(120, 10, 20, 20);
+            ctx.fillRect(10, 120, 20, 20);
+            
+            // White centers
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(15, 15, 10, 10);
+            ctx.fillRect(125, 15, 10, 10);
+            ctx.fillRect(15, 125, 10, 10);
+            
+            container.innerHTML = '';
+            container.appendChild(canvas);
+            
+            // Add data text below QR
+            var textDiv = document.createElement('div');
+            textDiv.style.fontSize = '10px';
+            textDiv.style.marginTop = '5px';
+            textDiv.style.fontFamily = 'monospace';
+            textDiv.textContent = data.substring(0, 20) + '...';
+            container.appendChild(textDiv);
+        }
+        
+        function simpleHash(str) {
+            var hash = 0;
+            for (var i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash + str.charCodeAt(i)) & 0xffffffff;
+            }
+            return hash;
+        }
+        
+        // Initialize when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>

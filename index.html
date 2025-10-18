@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Verifikasi Pembayaran & Check-In</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVIGATION */
+        .nav {
+            background: #2c3e50;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .tab-btn:hover {
+            background: #2c3e50;
+        }
+        
+        .tab-btn.active {
+            background: #3498db;
+        }
+        
+        /* SECTIONS */
+        .section {
+            display: none;
+            padding: 30px;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        /* FORM STYLING */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        button.danger {
+            background: #e74c3c;
+        }
+        
+        button.danger:hover {
+            background: #c0392b;
+        }
+        
+        button.success {
+            background: #27ae60;
+        }
+        
+        button.success:hover {
+            background: #229954;
+        }
+        
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .bukti-img {
+            max-width: 80px;
+            max-height: 80px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        /* STATUS BADGE */
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .status.pending {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .status.approved {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .status.rejected {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        /* ALERT */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        /* QR CODE */
+        .qr-canvas {
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: block;
+        }
+        
+        .qr-container {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .qr-payment-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f5e9;
+            border: 2px solid #27ae60;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .qr-payment-container.active {
+            display: block;
+        }
+        
+        /* CHECKIN RESULT */
+        #checkinResult {
+            margin-top: 20px;
+            font-size: 18px;
+            padding: 20px;
+            text-align: center;
+            border-radius: 4px;
+        }
+        
+        .checkin-success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #27ae60;
+        }
+        
+        .checkin-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #e74c3c;
+        }
+        
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .wa-link {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .payment-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- NAVIGATION -->
+        <nav class="nav">
+            <button class="tab-btn active" onclick="showTab('pembayaran')">Pembayaran</button>
+            <button class="tab-btn" onclick="showTab('admin')">Admin</button>
+            <button class="tab-btn" onclick="showTab('login')">Login User</button>
+            <button class="tab-btn" onclick="showTab('gate')">Gate Scanner</button>
+        </nav>
+        
+        <!-- SECTION 1: PEMBAYARAN -->
+        <section id="pembayaran" class="section active">
+            <h2>📋 Form Pembayaran</h2>
+            <form id="formPembayaran">
+                <div class="form-group">
+                    <label>Nama Lengkap:</label>
+                    <input type="text" id="nama" required placeholder="Masukkan nama lengkap">
+                </div>
+                <div class="form-group">
+                    <label>Nomor HP (WhatsApp):</label>
+                    <input type="text" id="phone" required placeholder="628xxxxxxxxxx" pattern="628[0-9]{9,11}">
+                    <small>Format: 628xxxxxxxxxx (tanpa +)</small>
+                </div>
+                <div class="form-group">
+                    <label>Nominal Pembayaran:</label>
+                    <input type="number" id="amount" required placeholder="Minimal : 50000" min="5000" oninput="handleAmountInput()">
+                </div>
+                
+                <!-- QR Payment Container -->
+                <div id="qrPaymentContainer" class="qr-payment-container">
+                    <h3 style="color: #27ae60; margin-bottom: 10px;">💳 Scan QR untuk Pembayaran</h3>
+                    <div class="payment-info">
+                        <strong>Nominal: Rp <span id="displayAmount">0</span></strong><br>
+                        <small>Scan QR di bawah menggunakan aplikasi pembayaran Anda</small>
+                    </div>
+                    <canvas id="qrPaymentCanvas" class="qr-canvas" width="200" height="200"></canvas>
+                    <p style="margin-top: 10px; color: #666; font-size: 12px;">QR Code Pembayaran</p>
+                </div>
+                
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Upload Bukti Pembayaran:</label>
+                    <input type="file" id="bukti" accept="image/*" required>
+                </div>
+                <button type="submit" class="success">Kirim Pembayaran</button>
+            </form>
+            <div id="paymentAlert" style="margin-top: 20px;"></div>
+        </section>
+        
+        <!-- SECTION 2: ADMIN PANEL -->
+        <section id="admin" class="section">
+            <h2>🔐 Admin Panel</h2>
+            
+            <!-- Admin Login -->
+            <div id="adminLogin">
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" id="adminUser" placeholder="admin">
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="adminPass" placeholder="">
+                </div>
+                <button onclick="loginAdmin()">Login Admin</button>
+                <div id="adminLoginAlert" style="margin-top: 15px;"></div>
+            </div>
+            
+            <!-- Admin Dashboard -->
+            <div id="adminDashboard" style="display:none">
+                <button onclick="logoutAdmin()" class="danger">Logout</button>
+                <table id="tabelPembayaran">
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Phone</th>
+                            <th>Amount</th>
+                            <th>Bukti</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data akan diisi oleh JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <!-- SECTION 3: LOGIN USER -->
+        <section id="login" class="section">
+            <h2>🔑 Login User</h2>
+            <form id="formLogin">
+                <div class="form-group">
+                    <label>Nomor HP:</label>
+                    <input type="text" id="loginPhone" required placeholder="628xxxxxxxxxx">
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="loginPass" required placeholder="">
+                </div>
+                <button type="submit" class="success">Login</button>
+            </form>
+            <div id="loginAlert" style="margin-top: 20px;"></div>
+        </section>
+        
+        <!-- SECTION 4: DASHBOARD USER -->
+        <section id="dashboard" class="section">
+            <h2>📱 Dashboard User</h2>
+            <div id="dashboardContent"></div>
+            <div class="qr-container">
+                <h3 style="color: #2c3e50; margin-bottom: 15px;">🎫 QR Code Check-In Anda</h3>
+                <canvas id="qrCheckinCanvas" class="qr-canvas" width="250" height="250"></canvas>
+                <p style="margin-top: 10px; color: #666;">Tunjukkan QR Code ini di Gate Check-In</p>
+            </div>
+            <button onclick="logoutUser()" style="margin-top: 20px;">Logout</button>
+        </section>
+        
+        <!-- SECTION 5: GATE SCANNER -->
+        <section id="gate" class="section">
+            <h2>🚪 Gate Check-In Scanner</h2>
+            <div class="form-group">
+                <label>Token Check-In:</label>
+                <input type="text" id="tokenInput" placeholder="Paste token atau scan QR">
+            </div>
+            <button onclick="validateCheckin()" class="success">Validasi Check-In</button>
+            <div id="checkinResult"></div>
+            
+            <h3 style="margin-top: 40px; color: #2c3e50;">Riwayat Check-In:</h3>
+            <div id="checkinHistory" style="margin-top: 20px;"></div>
+        </section>
+    </div>
+    
+    <!-- MODAL untuk preview gambar -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <img class="modal-content" id="modalImage">
+    </div>
+    
+    <script>
+        // ============================================
+        // 1. INIT & HELPERS
+        // ============================================
+        
+        // Initialize localStorage jika belum ada
+        if (!localStorage.getItem('payments')) {
+            localStorage.setItem('payments', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('users')) {
+            localStorage.setItem('users', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('checkins')) {
+            localStorage.setItem('checkins', JSON.stringify([]));
+        }
+        
+        // Generate random token
+        function generateToken() {
+            return Math.random().toString(36).substr(2, 12) + Date.now().toString(36);
+        }
+        
+        // Show/hide tabs
+        function showTab(tabName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load content berdasarkan tab
+            if (tabName === 'admin' && sessionStorage.getItem('adminLoggedIn')) {
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
+                loadAdminTable();
+            }
+            
+            if (tabName === 'dashboard' && sessionStorage.getItem('currentUser')) {
+                loadDashboard();
+            } else if (tabName === 'dashboard') {
+                showTab('login');
+                showAlert('loginAlert', 'Silakan login terlebih dahulu', 'error');
+            }
+            
+            if (tabName === 'gate') {
+                loadCheckinHistory();
+            }
+        }
+        
+        // Alert helper
+        function showAlert(elementId, message, type) {
+            const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-error' : 'alert-info';
+            document.getElementById(elementId).innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+            
+            setTimeout(() => {
+                document.getElementById(elementId).innerHTML = '';
+            }, 5000);
+        }
+        
+        // ============================================
+        // 2. PEMBAYARAN
+        // ============================================
+        
+        // Handle amount input - show QR payment when amount is entered
+        function handleAmountInput() {
+            const amount = document.getElementById('amount').value;
+            const qrContainer = document.getElementById('qrPaymentContainer');
+            
+            if (amount && amount >= 1000) {
+                qrContainer.classList.add('active');
+                document.getElementById('displayAmount').textContent = parseInt(amount).toLocaleString('id-ID');
+                
+                // Generate dummy payment QR
+                generatePaymentQR(amount);
+            } else {
+                qrContainer.classList.remove('active');
+            }
+        }
+        
+        // Generate Payment QR (Dummy - berbeda dari QR Check-in)
+        function generatePaymentQR(amount) {
+            const canvas = document.getElementById('qrPaymentCanvas');
+            const ctx = canvas.getContext('2d');
+            const size = 200;
+            const qrSize = 20;
+            const moduleSize = size / qrSize;
+            
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Generate pattern based on amount (untuk variasi QR berbeda per nominal)
+            ctx.fillStyle = 'black';
+            let hash = parseInt(amount) * 31337; // Magic number untuk payment QR
+            
+            // Draw payment QR pattern
+            for (let y = 0; y < qrSize; y++) {
+                for (let x = 0; x < qrSize; x++) {
+                    const val = (hash + x * 13 + y * 17) % 3;
+                    if (val > 0 || (x < 6 && y < 6) || (x >= qrSize - 6 && y < 6) || (x < 6 && y >= qrSize - 6)) {
+                        ctx.fillRect(x * moduleSize, y * moduleSize, moduleSize, moduleSize);
+                    }
+                }
+            }
+            
+            // Draw finder patterns (payment style - with dots)
+            drawPaymentFinderPattern(ctx, 0, 0, moduleSize);
+            drawPaymentFinderPattern(ctx, (qrSize - 6) * moduleSize, 0, moduleSize);
+            drawPaymentFinderPattern(ctx, 0, (qrSize - 6) * moduleSize, moduleSize);
+            
+            // Add "PAY" text indicator
+            ctx.fillStyle = 'green';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('PAYMENT', size / 2, size - 8);
+        }
+        
+        function drawPaymentFinderPattern(ctx, x, y, moduleSize) {
+            // Outer square (green for payment)
+            ctx.fillStyle = '#27ae60';
+            ctx.fillRect(x, y, 6 * moduleSize, 6 * moduleSize);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x + moduleSize, y + moduleSize, 4 * moduleSize, 4 * moduleSize);
+            ctx.fillStyle = '#27ae60';
+            ctx.fillRect(x + 2 * moduleSize, y + 2 * moduleSize, 2 * moduleSize, 2 * moduleSize);
+        }
+        
+        document.getElementById('formPembayaran').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const nama = document.getElementById('nama').value;
+            const phone = document.getElementById('phone').value;
+            const amount = document.getElementById('amount').value;
+            const buktiFile = document.getElementById('bukti').files[0];
+            
+            // Convert image to base64
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const payments = JSON.parse(localStorage.getItem('payments'));
+                
+                // Cek apakah phone sudah pernah submit
+                const existing = payments.find(p => p.phone === phone);
+                if (existing) {
+                    showAlert('paymentAlert', 'Nomor HP ini sudah terdaftar!', 'error');
+                    return;
+                }
+                
+                payments.push({
+                    nama: nama,
+                    phone: phone,
+                    amount: parseInt(amount),
+                    bukti: event.target.result,
+                    status: 'PENDING',
+                    timestamp: new Date().toISOString()
+                });
+                
+                localStorage.setItem('payments', JSON.stringify(payments));
+                
+                showAlert('paymentAlert', '✅ Pembayaran berhasil dikirim! Status: PENDING. Tunggu verifikasi admin.', 'success');
+                
+                // Reset form
+                document.getElementById('formPembayaran').reset();
+                document.getElementById('qrPaymentContainer').classList.remove('active');
+            };
+            
+            reader.readAsDataURL(buktiFile);
+        };
+        
+        // ============================================
+        // 3. ADMIN PANEL
+        // ============================================
+        
+        function loginAdmin() {
+            const username = document.getElementById('adminUser').value;
+            const password = document.getElementById('adminPass').value;
+            
+            if (username === 'admin' && password === 'admin123') {
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
+                loadAdminTable();
+                showAlert('adminLoginAlert', 'Login berhasil!', 'success');
+            } else {
+                showAlert('adminLoginAlert', 'Username atau password salah!', 'error');
+            }
+        }
+        
+        function logoutAdmin() {
+            sessionStorage.removeItem('adminLoggedIn');
+            document.getElementById('adminLogin').style.display = 'block';
+            document.getElementById('adminDashboard').style.display = 'none';
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
+        }
+        
+        function loadAdminTable() {
+            const payments = JSON.parse(localStorage.getItem('payments'));
+            const tbody = document.querySelector('#tabelPembayaran tbody');
+            tbody.innerHTML = '';
+            
+            if (payments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Belum ada data pembayaran</td></tr>';
+                return;
+            }
+            
+            payments.forEach((p, index) => {
+                const row = document.createElement('tr');
+                
+                const statusClass = p.status.toLowerCase();
+                const actionButtons = p.status === 'PENDING' ? `
+                    <div class="action-buttons">
+                        <button class="success" onclick="approvePayment('${p.phone}')">Approve</button>
+                        <button class="danger" onclick="rejectPayment('${p.phone}')">Reject</button>
+                    </div>
+                ` : `<span style="color:#999;">-</span>`;
+                
+                row.innerHTML = `
+                    <td>${p.nama}</td>
+                    <td>${p.phone}</td>
+                    <td>Rp ${p.amount.toLocaleString('id-ID')}</td>
+                    <td><img src="${p.bukti}" class="bukti-img" onclick="showImageModal('${p.bukti}')"></td>
+                    <td><span class="status ${statusClass}">${p.status}</span></td>
+                    <td>${actionButtons}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function approvePayment(phone) {
+            if (!confirm('Approve pembayaran ini?')) return;
+            
+            // Update status payment
+            const payments = JSON.parse(localStorage.getItem('payments'));
+            const payment = payments.find(p => p.phone === phone);
+            payment.status = 'APPROVED';
+            localStorage.setItem('payments', JSON.stringify(payments));
+            
+            // Buat akun user
+            const users = JSON.parse(localStorage.getItem('users'));
+            const existingUser = users.find(u => u.phone === phone);
+            
+            if (!existingUser) {
+                const token = generateToken();
+                users.push({
+                    phone: phone,
+                    password: '123',
+                    token: token,
+                    nama: payment.nama
+                });
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Generate WhatsApp link
+                const currentUrl = window.location.href.split('#')[0];
+                const message = `Akses mobile/web Anda sudah aktif.%0ALogin:%0AHP: ${phone}%0APassword: 123%0ALink: ${currentUrl}#login%0A%0ASetelah login, QR Check-In tersedia.`;
+                const waLink = `https://wa.me/${phone}?text=${message}`;
+                
+                alert('✅ Payment APPROVED!\n\nUser account created:\nPhone: ' + phone + '\nPassword: 123\n\nKirim link WA berikut ke user:\n\n' + waLink);
+                
+                // Optional: open WA link
+                if (confirm('Buka WhatsApp sekarang?')) {
+                    window.open(waLink, '_blank');
+                }
+            } else {
+                alert('✅ Payment APPROVED!\nUser sudah memiliki akun.');
+            }
+            
+            loadAdminTable();
+        }
+        
+        function rejectPayment(phone) {
+            if (!confirm('Reject pembayaran ini?')) return;
+            
+            const payments = JSON.parse(localStorage.getItem('payments'));
+            const payment = payments.find(p => p.phone === phone);
+            payment.status = 'REJECTED';
+            localStorage.setItem('payments', JSON.stringify(payments));
+            
+            alert('❌ Payment REJECTED');
+            loadAdminTable();
+        }
+        
+        function showImageModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+        
+        // ============================================
+        // 4. LOGIN USER
+        // ============================================
+        
+        document.getElementById('formLogin').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const phone = document.getElementById('loginPhone').value;
+            const password = document.getElementById('loginPass').value;
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const user = users.find(u => u.phone === phone && u.password === password);
+            
+            if (user) {
+                sessionStorage.setItem('currentUser', phone);
+                showTab('dashboard');
+                loadDashboard();
+            } else {
+                showAlert('loginAlert', 'Phone atau password salah! (Password default: 123)', 'error');
+            }
+        };
+        
+        // ============================================
+        // 5. DASHBOARD USER
+        // ============================================
+        
+        function loadDashboard() {
+            const phone = sessionStorage.getItem('currentUser');
+            if (!phone) {
+                showTab('login');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const user = users.find(u => u.phone === phone);
+            
+            if (!user) {
+                sessionStorage.removeItem('currentUser');
+                showTab('login');
+                return;
+            }
+            
+            document.getElementById('dashboardContent').innerHTML = `
+                <div class="alert alert-success">
+                    <strong>Selamat datang, ${user.nama}!</strong><br>
+                    Phone: ${user.phone}<br>
+                    Token Check-In: <code>${user.token}</code>
+                </div>
+            `;
+            
+            // Generate Check-in QR Code (berbeda dari payment QR)
+            const qrUrl = window.location.href.split('#')[0] + '#checkin?token=' + user.token;
+            generateCheckinQR(user.token);
+        }
+        
+        function logoutUser() {
+            sessionStorage.removeItem('currentUser');
+            showTab('login');
+        }
+        
+        // ============================================
+        // 6. QR CODE GENERATOR - CHECK-IN (berbeda dari Payment)
+        // ============================================
+        
+        function generateCheckinQR(token) {
+            const canvas = document.getElementById('qrCheckinCanvas');
+            const ctx = canvas.getContext('2d');
+            const size = 250;
+            const qrSize = 25;
+            const moduleSize = size / qrSize;
+            
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Generate pattern based on token (berbeda dari payment)
+            ctx.fillStyle = 'black';
+            let hash = 0;
+            for (let i = 0; i < token.length; i++) {
+                hash = ((hash << 5) - hash) + token.charCodeAt(i) * 7919; // Prime untuk check-in
+                hash = hash & hash;
+            }
+            
+            // Draw check-in QR pattern
+            for (let y = 0; y < qrSize; y++) {
+                for (let x = 0; x < qrSize; x++) {
+                    const val = (hash + x * 11 + y * 19) % 2; // Berbeda dari payment
+                    if (val === 1 || (x < 7 && y < 7) || (x >= qrSize - 7 && y < 7) || (x < 7 && y >= qrSize - 7)) {
+                        ctx.fillRect(x * moduleSize, y * moduleSize, moduleSize, moduleSize);
+                    }
+                }
+            }
+            
+            // Draw finder patterns (check-in style - square black)
+            drawCheckinFinderPattern(ctx, 0, 0, moduleSize);
+            drawCheckinFinderPattern(ctx, (qrSize - 7) * moduleSize, 0, moduleSize);
+            drawCheckinFinderPattern(ctx, 0, (qrSize - 7) * moduleSize, moduleSize);
+            
+            // Add "CHECK-IN" text indicator
+            ctx.fillStyle = 'blue';
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('CHECK-IN', size / 2, size - 8);
+            
+            // Draw token preview
+            ctx.fillStyle = 'black';
+            ctx.font = '9px monospace';
+            ctx.fillText(token.substr(0, 22), size / 2, size - 20);
+        }
+        
+        function drawCheckinFinderPattern(ctx, x, y, moduleSize) {
+            // Outer square (blue for check-in)
+            ctx.fillStyle = '#3498db';
+            ctx.fillRect(x, y, 7 * moduleSize, 7 * moduleSize);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x + moduleSize, y + moduleSize, 5 * moduleSize, 5 * moduleSize);
+            ctx.fillStyle = 'black';
+            ctx.fillRect(x + 2 * moduleSize, y + 2 * moduleSize, 3 * moduleSize, 3 * moduleSize);
+        }
+        
+        // ============================================
+        // 7. GATE CHECK-IN
+        // ============================================
+        
+        function validateCheckin() {
+            let token = document.getElementById('tokenInput').value.trim();
+            
+            // Jika kosong, coba ambil dari URL
+            if (!token) {
+                const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+                token = urlParams.get('token');
+            }
+            
+            if (!token) {
+                document.getElementById('checkinResult').innerHTML = `
+                    <div class="checkin-error">❌ Token tidak valid!</div>
+                `;
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const user = users.find(u => u.token === token);
+            
+            if (user) {
+                // Log checkin
+                const checkins = JSON.parse(localStorage.getItem('checkins'));
+                checkins.push({
+                    phone: user.phone,
+                    nama: user.nama,
+                    timestamp: new Date().toLocaleString('id-ID')
+                });
+                localStorage.setItem('checkins', JSON.stringify(checkins));
+                
+                document.getElementById('checkinResult').innerHTML = `
+                    <div class="checkin-success">
+                        ✅ <strong>Check-In Berhasil!</strong><br>
+                        Nama: ${user.nama}<br>
+                        Phone: ${user.phone}
+                    </div>
+                `;
+                
+                document.getElementById('tokenInput').value = '';
+                loadCheckinHistory();
+            } else {
+                document.getElementById('checkinResult').innerHTML = `
+                    <div class="checkin-error">❌ Token tidak valid atau sudah digunakan!</div>
+                `;
+            }
+        }
+        
+        function loadCheckinHistory() {
+            const checkins = JSON.parse(localStorage.getItem('checkins'));
+            const container = document.getElementById('checkinHistory');
+            
+            if (checkins.length === 0) {
+                container.innerHTML = '<p style="color:#999;">Belum ada riwayat check-in</p>';
+                return;
+            }
+            
+            let html = '<table style="width:100%; margin-top:10px;"><thead><tr><th>Nama</th><th>Phone</th><th>Waktu</th></tr></thead><tbody>';
+            
+            checkins.reverse().forEach(c => {
+                html += `<tr><td>${c.nama}</td><td>${c.phone}</td><td>${c.timestamp}</td></tr>`;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+        
+        // ============================================
+        // 8. INIT ON LOAD
+        // ============================================
+        
+        window.onload = function() {
+            // Check URL hash untuk auto-navigate
+            const hash = window.location.hash.substr(1);
+            
+            if (hash.startsWith('checkin')) {
+                showTab('gate');
+                // Auto-validate jika ada token di URL
+                setTimeout(() => {
+                    const urlParams = new URLSearchParams(hash.split('?')[1]);
+                    const token = urlParams.get('token');
+                    if (token) {
+                        document.getElementById('tokenInput').value = token;
+                        validateCheckin();
+                    }
+                }, 100);
+            } else if (hash === 'login') {
+                document.querySelectorAll('.tab-btn')[2].click();
+            } else if (hash === 'dashboard') {
+                if (sessionStorage.getItem('currentUser')) {
+                    document.querySelectorAll('.tab-btn')[2].click();
+                    setTimeout(() => showTab('dashboard'), 100);
+                }
+            }
+            
+            // Check admin login status
+            if (sessionStorage.getItem('adminLoggedIn')) {
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>
